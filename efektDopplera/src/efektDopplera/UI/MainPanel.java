@@ -8,11 +8,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.LayoutManager;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class MainPanel extends JPanel {
+public class MainPanel extends JPanel implements Runnable {
 
 	int width, height;
 	
@@ -22,18 +25,35 @@ public class MainPanel extends JPanel {
 	
 	final public String observerPath = "img/mic.png";
 	final ImageIcon observerIcon = new ImageIcon(observerPath);
-	final public Image observer = observerIcon.getImage();
+	//final public Image observer = observerIcon.getImage();
 	
 	int imgWidth, imgHeight;
 	
-	public MainPanel() {
+	//float observerFrequency;
+	
+	WaveSource waveSource;
+	Observer observer; 
+	
+	//lista narysowanych okregow
+
+	ArrayList<Wave> waves = new ArrayList<Wave>();
+	
+	
+	MainWindow f; //Przyjmuje ten parametr, zeby watek sie mial kiedy skonczyc i do odmierzania czasu dla fali 
+	
+	public MainPanel(WaveSource waveSource) {
 		this.setBackground(new Color(200, 210, 240));
 		//narazie na sztywno, potencjalnie brane z aktualnych rozmiarów okna
+		
 		this.width = 900;
 		this.height = 600;
 		
 		this.imgWidth = 150;
 		this.imgHeight = 150;
+		
+		
+		this.waveSource = waveSource;
+		this.observer = new Observer((this.width - this.imgWidth)/2, this.height - 160, this.imgWidth , this.imgHeight - 10);
 		
 		this.setPreferredSize(new Dimension(this.width, this.height)); 
 		
@@ -41,8 +61,11 @@ public class MainPanel extends JPanel {
 	
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.drawImage(source, 10, this.height - 160, this.imgWidth, this.imgHeight, this);
-		g.drawImage(observer, 500, this.height - 160, this.imgWidth , this.imgHeight - 10, this);
+		this.waveSource.draw(g);
+		this.observer.draw(g);
+		this.drawWaves(g);
+		//g.drawImage(source, 10, this.height - 160, this.imgWidth, this.imgHeight, this);
+		//g.drawImage(observer, (this.width - this.imgWidth)/2, this.height - 160, this.imgWidth , this.imgHeight - 10, this);
 		this.drawArrow(g);
 		
 	}
@@ -75,6 +98,76 @@ public class MainPanel extends JPanel {
 		this.setPreferredSize(new Dimension(this.width, this.height));
 		this.repaint();
 	}
+	
+	
+	public void setFrame(MainWindow f) {
+		this.f =f;
+	}
+	
+	private void drawWaves(Graphics g) {
+		Wave wave;
+		Color tmp = g.getColor();
+		for (int i = 0; i < waves.size(); i++) {
+			//System.out.println(waves.get(i));
+			if (i%2 == 0) {
+				g.setColor(this.getBackground());
+			}
+			else {
+				g.setColor(Color.RED);
+			}
+			wave = (Wave) waves.get(i);
+			wave.draw(g);
+		}
+		g.setColor(tmp);
+	}
+	
+	public void run() {
+		System.out.println("rozpoczecie watku");
+		while(f.getControlPanel().isItRunning()) { 
+			waveSource.updatePosition();
+			for(Wave w: this.waves) {
+				w.updateWavePosition(f.getTimeDelaySecs());
+			}
+			
+			//Stworzenie nowej fali rozchodzacej sie 
+			//TODO przemyslec ideę tworzenia fali w danej chwili czasu
+			if (this.waveSource.getFreq() != 0 ) {
+				Wave circle = new Wave();
+				circle.setX(this.waveSource.getX());
+				circle.setY(this.waveSource.getY());
+				circle.setSourceFreq(this.waveSource.getFreq());
+				waves.add(circle);
+			}
+			
+			
+			try {
+				Thread.sleep(f.getTimeDelayMilis());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			f.getControlPanel().xCords.setText(String.valueOf(this.waveSource.getX()));
+			//f.getControlPanel().yCords.setText(String.valueOf(this.waveSource.getY()));
+			//yCords.setText(String.valueOf(this.waveSource.getY()));
+			this.repaint();
+		}
+		System.out.println("Zakmnieto okno");
+	}
+	
+	public void calculateObserverFreq() {
+		float positionCoefficient = (float) ( (this.waveSource.getX() - this.observer.getX())  / Math.pow(Math.pow(this.waveSource.getX() - this.observer.getX(), 2) + Math.pow(this.waveSource.getY() - this.observer.getY(), 2), 0.5));
+		this.observer.setFreq(waveSource.getFreq() * 340 / (340 + waveSource.getVelocity() * positionCoefficient)); //Czy to abs faktycznie tu powinno byc?
+		
+	}
+	
+	public float getObserverFreq() {
+		return this.observer.getFreq();
+	}
+	
+	public void clearWaveArray() {
+		this.waves.clear();
+	}
+	
 	
 
 }

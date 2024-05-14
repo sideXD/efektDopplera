@@ -8,20 +8,31 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.NumberFormat;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import javax.management.InvalidAttributeValueException;
+import javax.swing.InputVerifier;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.NumberFormatter;
 
-public class ControlPanel extends JPanel implements ActionListener{
-	static final int VMINOR_SPACING = 1;
-	static final int VMAJOR_SPACING = 5;
-	static final int FMINOR_SPACING = 5;
-	static final int FMAJOR_SPACING = 10;
+public class ControlPanel extends JPanel implements ActionListener, ChangeListener, Runnable{
+	static final int VMINOR_SPACING = 0;
+	static final int VMAJOR_SPACING = 20;
+	static final int FMINOR_SPACING = 50;
+	static final int FMAJOR_SPACING = 100;
 	static final int INIT_Val = 0;
 	
 	final int WIDTH = 300;
@@ -29,14 +40,34 @@ public class ControlPanel extends JPanel implements ActionListener{
 	final Color COLOR = new Color(200, 200,250);
 	
 	JSlider vSource, vObserver, fSource;
+	JTextField xCords;
+	JTextField yCords;
 	JTextField fObserver;
 	JButton pauseButton;
 	
-	public ControlPanel() {
+	boolean isRunning = false;
+	
+	
+	MainWindow f;
+	
+	//przyjmoawne jako argument w konstruktorze - komunikacja
+	WaveSource waveSource;
+	MainPanel mainPanel;
+	//
+	
+	//guziki do updateowania pozycji zrodla fali
+	JButton okButton;
+	
+	
+	public ControlPanel(WaveSource waveSource, MainPanel mainPanel) {
+//Przypisanie kontrtnych pol control panelu
+		this.waveSource = waveSource;
+		this.mainPanel = mainPanel;
+		
 //ustawienia panelu kontrolnego
 		this.setLayout(new GridLayout(5,1));
-		
 //predkosc zrodla
+		
 		JPanel sourcePanel = new JPanel();
 		sourcePanel.setLayout(new GridLayout(SCALE,1));
 		sourcePanel.setPreferredSize(new Dimension(this.WIDTH, 100));
@@ -46,7 +77,10 @@ public class ControlPanel extends JPanel implements ActionListener{
 		Font sourceFont = new Font ("Arrial", Font.ROMAN_BASELINE, 16);
 		vSourceLabel.setFont(sourceFont);
 		
-		vSource = new JSlider(-10, 10, INIT_Val); //predkosc w m/s
+		vSource = new JSlider(-100, 100, INIT_Val); //predkosc w m/s
+		
+		vSource.addChangeListener(this);
+		
 		vSource.setMinorTickSpacing(VMINOR_SPACING);
 		vSource.setMajorTickSpacing(VMAJOR_SPACING);
 		vSource.setPaintLabels(true);
@@ -96,29 +130,51 @@ public class ControlPanel extends JPanel implements ActionListener{
 			
 			JLabel xCordsLabel = new JLabel("x", SwingConstants.CENTER);
 			xCordsLabel.setFont(coordinatesFont);
+			/*
+			NumberFormat numFormat = NumberFormat.getIntegerInstance();
+			NumberFormatter numFormatter = new NumberFormatter(numFormat);
+			JFormattedTextField xCords = new JFormattedTextField(numFormatter);
 			
-			JTextField xCords = new JTextField();
 			xCords.setSize(new Dimension(100, xCords.getWidth()));
+			*/
+			this.xCords = new JTextField(String.valueOf(this.waveSource.getX()));
+			xCords.setSize(new Dimension(100, xCords.getWidth()));
+			
 			
 			JLabel yCordsLabel = new JLabel("y", SwingConstants.CENTER);
 			yCordsLabel.setFont(coordinatesFont);
 		
-			JTextField yCords = new JTextField();
+			this.yCords = new JTextField(String.valueOf(this.waveSource.getY()));
 			yCords.setSize(new Dimension(100, yCords.getWidth()));
-			
+
 			positionValPanel.add(xCordsLabel);
 			positionValPanel.add(xCords);
 			positionValPanel.add(yCordsLabel);
 			positionValPanel.add(yCords);
 			
+
+	//Panel z guzikiem zatwierdzajacym pozycje x, y
+			JPanel guzikOkPanel = new JPanel();
+			guzikOkPanel.setLayout(new BorderLayout());
+			guzikOkPanel.setBackground(this.COLOR);
+			this.okButton = new JButton();
+			okButton.setText("zatwierdź");
+			
+			this.okButton.addActionListener(this);
+			
+			Font okFont = new Font("Arrial", Font.ROMAN_BASELINE, 16);
+			okButton.setFont(okFont);
+			
+			okButton.setPreferredSize(new Dimension(this.WIDTH, 40));
+			guzikOkPanel.add(okButton, BorderLayout.CENTER);
+			
 			
 		positionPanel.add(positionLabel);
 		positionPanel.add(positionValPanel);
+		positionPanel.add(guzikOkPanel);
+	
 		
-		
-		
-		
-//czestotliwosc obserwwatora
+//czestotliwosc zrodla
 		JPanel freqPanel = new JPanel();
 		freqPanel.setLayout(new GridLayout(SCALE,1));
 		freqPanel.setBackground(this.COLOR);
@@ -127,7 +183,10 @@ public class ControlPanel extends JPanel implements ActionListener{
 		Font freqFont = new Font ("Arrial", Font.ROMAN_BASELINE, 16);
 		fLabel.setFont(freqFont);
 		
-		fSource = new JSlider(0, 100, INIT_Val); //czestotliwosc w Hz
+		fSource = new JSlider(0, 500, INIT_Val); //czestotliwosc w Hz
+		
+		fSource.addChangeListener(this);
+		
 		fSource.setMinorTickSpacing(FMINOR_SPACING);
 		fSource.setMajorTickSpacing(FMAJOR_SPACING);
 		fSource.setPaintLabels(true);
@@ -183,14 +242,78 @@ public class ControlPanel extends JPanel implements ActionListener{
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		if(pauseButton.getText() == "Start") {
-			pauseButton.setText("Stop");
-			pauseButton.setBackground(Color.RED);
+		ExecutorService exec = Executors.newFixedThreadPool(2);
+		if(e.getSource() == this.pauseButton) {
+			if(pauseButton.getText() == "Start") {
+				pauseButton.setText("Stop");
+				this.isRunning = true;
+				pauseButton.setBackground(Color.RED);
+				System.out.println(this.isRunning);
+				this.mainPanel.clearWaveArray();
+				mainPanel.repaint();
+				
+				exec.execute(f.getMainPanel());
+				exec.execute(f.getControlPanel());
+				exec.shutdown();
+			}
+			else {
+				pauseButton.setText("Start");
+				pauseButton.setBackground(Color.GREEN);
+				this.isRunning = false;
+				System.out.println(this.isRunning);
+			}
 		}
-		else {
-			pauseButton.setText("Start");
-			pauseButton.setBackground(Color.GREEN);
+		else if (e.getSource() == this.okButton) {
+			try {
+				int sourceXpos, sourceYpos;
+				sourceXpos = Integer.valueOf(this.xCords.getText());
+				sourceYpos = Integer.valueOf(this.yCords.getText());
+				waveSource.setPosition(sourceXpos, sourceYpos);
+				this.mainPanel.repaint();
+			}
+			catch(NumberFormatException ex) {
+				this.xCords.setText(String.valueOf(waveSource.getX()));
+				this.yCords.setText(String.valueOf(waveSource.getY()));
+			}
 		}
+	}
+	
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource() == this.vSource) {
+			this.waveSource.setVelocity(this.vSource.getValue());
+		}
+		else if (e.getSource() == this.fSource) {
+			this.waveSource.setFreq(this.fSource.getValue());
+			//System.out.println(waveSource.getFreq());
+		}
+	}
+	
+	private void updateFreqDisplay() {
+			this.mainPanel.calculateObserverFreq();
+			float freq = this.mainPanel.getObserverFreq();
+			//System.out.println(freq);
+			this.fObserver.setText(String.valueOf(freq) + "Hz");
+	}
+	
+	public void run() {
+		while(isRunning) {
+			this.updateFreqDisplay();
+			//xCords.setText(String.valueOf(this.waveSource.getX()));
+			//yCords.setText(String.valueOf(this.waveSource.getY()));
+		}
+	}
+	public void setFrame(MainWindow f) {
+		this.f =f;
+	}
+	
+	public boolean isItRunning() {
+		return this.isRunning;
+	}
+	
+	public void runningOff() {
+		this.isRunning = false;
 	}
 
 }
