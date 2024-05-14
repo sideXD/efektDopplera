@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 public class Wave {
-	String test = "jakis test";
 	int posX, posY;
 	int width, height;
 	double freq; //kazda fala ma swoja czestotliwosc
