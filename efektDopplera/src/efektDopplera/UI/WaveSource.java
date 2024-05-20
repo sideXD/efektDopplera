@@ -31,7 +31,7 @@ public class WaveSource {
 		this.imgWidth = 100;
 		this.imgHeight = 100;
 		//Wczytanie defaultowej ikony zrodla
-		readImage("img/source.png");
+		readImage("img/speaker_icon.png");
 		
 	}
 	public void readImage(String filePath) {

@@ -23,10 +23,15 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.NumberFormatter;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.awt.Component;
+import java.awt.Container;
 
 public class ControlPanel extends JPanel implements ActionListener, ChangeListener, Runnable{
 	static final int VMINOR_SPACING = 0;
@@ -53,16 +58,20 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 	//przyjmoawne jako argument w konstruktorze - komunikacja
 	WaveSource waveSource;
 	MainPanel mainPanel;
+	MainMenu menu;
 	//
 	
 	//guziki do updateowania pozycji zrodla fali
 	JButton okButton;
 	
+	JLabel vSourceLabel, positionLabel, xCordsLabel, yCordsLabel, fLabel, fObserverLabel;
 	
-	public ControlPanel(WaveSource waveSource, MainPanel mainPanel) {
+	
+	public ControlPanel(Locale locale, WaveSource waveSource, MainPanel mainPanel, MainMenu menu) {
 //Przypisanie kontrtnych pol control panelu
 		this.waveSource = waveSource;
 		this.mainPanel = mainPanel;
+		menu = new MainMenu(locale);
 		
 //ustawienia panelu kontrolnego
 		this.setLayout(new GridLayout(5,1));
@@ -73,9 +82,10 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		sourcePanel.setPreferredSize(new Dimension(this.WIDTH, 100));
 		sourcePanel.setBackground(this.COLOR);
 		
-		JLabel vSourceLabel = new JLabel ("Prędkość źródła [m/s]: ", SwingConstants.CENTER);
+		vSourceLabel = new JLabel (menu.messages.getString("controlSourcevelocity"), SwingConstants.CENTER);
 		Font sourceFont = new Font ("Arrial", Font.ROMAN_BASELINE, 16);
 		vSourceLabel.setFont(sourceFont);
+		vSourceLabel.setName("controlSourcevelocity");
 		
 		vSource = new JSlider(-100, 100, INIT_Val); //predkosc w m/s
 		
@@ -117,9 +127,10 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		positionPanel.setLayout(new GridLayout(SCALE,1));
 		positionPanel.setBackground(this.COLOR);
 		
-		JLabel positionLabel = new JLabel("Początkowa pozycja źródła", SwingConstants.CENTER);
+		positionLabel = new JLabel(menu.messages.getString("controlSourceposition"), SwingConstants.CENTER);
 		Font postionFont = new Font("Arial", Font.ROMAN_BASELINE, 16);
 		positionLabel.setFont(postionFont);
+		positionLabel.setName("controlSourceposition");
 		
 		//panel  z samymi wartosciami
 			JPanel positionValPanel = new JPanel();
@@ -128,7 +139,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 			
 			Font coordinatesFont = new Font("Arial", Font.ROMAN_BASELINE, 20);
 			
-			JLabel xCordsLabel = new JLabel("x", SwingConstants.CENTER);
+			xCordsLabel = new JLabel("x", SwingConstants.CENTER);
 			xCordsLabel.setFont(coordinatesFont);
 			/*
 			NumberFormat numFormat = NumberFormat.getIntegerInstance();
@@ -141,7 +152,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 			xCords.setSize(new Dimension(100, xCords.getWidth()));
 			
 			
-			JLabel yCordsLabel = new JLabel("y", SwingConstants.CENTER);
+			yCordsLabel = new JLabel("y", SwingConstants.CENTER);
 			yCordsLabel.setFont(coordinatesFont);
 		
 			this.yCords = new JTextField(String.valueOf(this.waveSource.getY()));
@@ -158,12 +169,13 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 			guzikOkPanel.setLayout(new BorderLayout());
 			guzikOkPanel.setBackground(this.COLOR);
 			this.okButton = new JButton();
-			okButton.setText("zatwierdź");
+			okButton.setText(menu.messages.getString("controlConfirm"));
 			
 			this.okButton.addActionListener(this);
 			
 			Font okFont = new Font("Arrial", Font.ROMAN_BASELINE, 16);
 			okButton.setFont(okFont);
+			okButton.setName("controlConfirm");
 			
 			okButton.setPreferredSize(new Dimension(this.WIDTH, 40));
 			guzikOkPanel.add(okButton, BorderLayout.CENTER);
@@ -179,9 +191,10 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		freqPanel.setLayout(new GridLayout(SCALE,1));
 		freqPanel.setBackground(this.COLOR);
 		
-		JLabel fLabel = new JLabel ("Częstotliwość źródła [Hz]: ", SwingConstants.CENTER);
+		fLabel = new JLabel (menu.messages.getString("controlSourcefrequency"), SwingConstants.CENTER);
 		Font freqFont = new Font ("Arrial", Font.ROMAN_BASELINE, 16);
 		fLabel.setFont(freqFont);
+		fLabel.setName("controlSourcefrequency");
 		
 		fSource = new JSlider(0, 500, INIT_Val); //czestotliwosc w Hz
 		
@@ -201,9 +214,10 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		textPanel.setBackground(this.COLOR);
 		
 		textPanel.setMinimumSize(new Dimension(100, 100));
-		JLabel fObserverLabel = new JLabel("Częstotliwość obserwowana: ", SwingConstants.CENTER);
+		fObserverLabel = new JLabel(menu.messages.getString("controlObservedfrequency"), SwingConstants.CENTER);
 		Font fObserverLabelFont = new Font ("Arrial", Font.ROMAN_BASELINE, 16);
 		fObserverLabel.setFont(fObserverLabelFont);
+		fObserverLabel.setName("controlObservedfrequency");
 		
 		fObserver = new JTextField("0 Hz");
 		fObserver.setEditable(false);
@@ -239,6 +253,23 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		this.add(freqPanel);
 		this.add(textPanel);
 		this.add(buttonPanel);
+	}
+	
+	public void updateControlPanel(MainMenu menu) {
+	    for (Component componentPanel : this.getComponents()) {
+	        if (componentPanel instanceof JPanel) {
+	            JPanel panel = (JPanel) componentPanel;
+	            for (Component component : panel.getComponents()) {
+	    	        if (component instanceof JLabel) {
+	    	            JLabel label = (JLabel) component;
+	    	            //System.out.println("Aktualizacja etykiety: " + label.getName());
+	    	            label.setText(menu.messages.getString(label.getName()));
+	    	        }
+	            }
+	        }
+	    }
+	    okButton.setText(menu.messages.getString("controlConfirm"));
+	    SwingUtilities.updateComponentTreeUI(this);
 	}
 	
 	public void actionPerformed(ActionEvent e) {

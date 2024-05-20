@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
@@ -14,6 +16,9 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class MainWindow extends JFrame implements ComponentListener{
 
@@ -26,9 +31,10 @@ public class MainWindow extends JFrame implements ComponentListener{
 	final private int timeDelay = 50; //w milisekundach !!!
 	
 	public MainWindow () throws HeadlessException{
+		
 		this.setLayout(new BorderLayout());
 		this.setSize(1200, 700);
-		this.setTitle("Program");
+		//this.setTitle(mainMenu.messages.getString("window.name"));
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.addComponentListener(this);
 		
@@ -41,12 +47,38 @@ public class MainWindow extends JFrame implements ComponentListener{
 		mainPanel.setFrame(this);
 		this.add(mainPanel, BorderLayout.LINE_START);
 		
-		controlPanel = new ControlPanel(waveSource, mainPanel);
+		mainMenu = new MainMenu(Locale.getDefault());
+		this.add(mainMenu, BorderLayout.PAGE_START);
+		
+		controlPanel = new ControlPanel(Locale.getDefault(), waveSource, mainPanel, mainMenu);
 		controlPanel.setFrame(this);
 		this.add(controlPanel, BorderLayout.LINE_END);
 		
-		mainMenu = new MainMenu();
-		this.add(mainMenu, BorderLayout.PAGE_START);
+		rename();
+		
+		mainMenu.plItem.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		    	mainMenu.ChangeIcon("img/flagapl.jpeg", mainMenu.language);
+		    	mainMenu.messages = ResourceBundle.getBundle("messages_pl", Locale.getDefault());
+		    	//System.out.println(mainMenu.messages.getString("menu.file"));
+		    	rename();
+		    	controlPanel.updateControlPanel(mainMenu);
+		    	mainMenu.updateMenu();
+		    }
+		});
+		
+		mainMenu.enItem.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		    	mainMenu.ChangeIcon("img/falgawb.jpeg", mainMenu.language);
+		    	mainMenu.messages = ResourceBundle.getBundle("messages_en", Locale.getDefault());
+		    	//System.out.println(mainMenu.messages.getString("menu.file"));
+		    	rename();
+		    	controlPanel.updateControlPanel(mainMenu);
+		    	mainMenu.updateMenu();
+		    }
+		});
 		
 		this.addWindowListener(new WindowListener() {
 			
@@ -92,6 +124,10 @@ public class MainWindow extends JFrame implements ComponentListener{
 				
 			}
 		});
+	}
+	
+	public void rename() {
+		this.setTitle(mainMenu.messages.getString("windowName"));
 	}
 	
 	public MainPanel getMainPanel() {

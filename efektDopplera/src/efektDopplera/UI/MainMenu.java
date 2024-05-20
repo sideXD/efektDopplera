@@ -11,20 +11,35 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JToggleButton;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import javax.swing.SwingUtilities;
 
 public class MainMenu extends JMenuBar {
-
+    private static final long serialVersionUID = 1L;
+    ResourceBundle messages;
+    JMenu file, chart, language, help;
+    JMenuItem plItem, enItem, description, authors, save, close, drawChart;
 	
-	public MainMenu() {
-		JMenu file = new JMenu("Plik");
-		JMenu chart = new JMenu("Wykres");
-		JMenu language = new JMenu("Język");
+	public MainMenu(Locale locale) {
+		messages = ResourceBundle.getBundle("messages_pl", locale);
 		
-		JMenuItem plItem = new JMenuItem("polski");
-		JMenuItem wbItem = new JMenuItem("angielski");
+		file = new JMenu(messages.getString("menuFile"));
+		chart = new JMenu(messages.getString("menuChart"));
+		language = new JMenu(messages.getString("menuLanguage"));
+        file.setName("File");
+        chart.setName("Chart");
+        language.setName("Language");
+		
+		plItem = new JMenuItem(messages.getString("menuLanguagePolish"));
+		enItem = new JMenuItem(messages.getString("menuLanguageEnglish"));
 		language.add(plItem);
-		language.add(wbItem);
+		language.add(enItem);
+        plItem.setName("LanguagePolish");
+        enItem.setName("LanguageEnglish");
 		
 		ChangeIcon("img/flagapl.jpeg", language);
 		
@@ -35,32 +50,46 @@ public class MainMenu extends JMenuBar {
 		    }
 		});
 		
-		wbItem.addActionListener(new ActionListener() {
+		enItem.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent e) {
 		    	ChangeIcon("img/falgawb.jpeg", language);
 		    }
 		});
 		
-		JMenu help = new JMenu("Pomoc");
-		JMenuItem description = new JMenuItem("Działanie programu");
+		help = new JMenu(messages.getString("menuHelp"));
+		description = new JMenuItem(messages.getString("menuHelpDescription"));
+		authors = new JMenuItem(messages.getString("menuHelpAuthors"));
 		//JLabel helpLabel = new JLabel(helpText);
 		//help.add(helpLabel);
 		description.addActionListener(new ActionListener() {
         	@Override
         	public void actionPerformed(ActionEvent e) {
-        			JOptionPane.showMessageDialog(null, "Krótki opis programu :)");
+        			JOptionPane.showMessageDialog(null, messages.getString("menuHelpDescriptionDialog"));
+        	}
+        	});
+		authors.addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        			JOptionPane.showMessageDialog(null, messages.getString("menuHelpAuthorsDialog"));
         	}
         	});
         help.add(description);
+        help.add(authors);
+        help.setName("Help");
+        description.setName("HelpDescription");
+        authors.setName("HelpAuthors");
 		
-		JMenuItem save = new JMenuItem("Zapisz do pliku");
-		JMenuItem close = new JMenuItem("Zamknij");
+		save = new JMenuItem(messages.getString("menuFileSave"));
+		close = new JMenuItem(messages.getString("menuFileClose"));
 		file.add(save);
 		file.add(close);
+        save.setName("FileSave");
+        close.setName("FileClose");
 		
-		JMenuItem drawChart = new JMenuItem("Rysuj wykres");
+		drawChart = new JMenuItem(messages.getString("menuChartDraw"));
 		chart.add(drawChart);
+        drawChart.setName("ChartDraw");
 		
 		this.add(file);
 		this.add(chart);
@@ -92,5 +121,25 @@ public class MainMenu extends JMenuBar {
         button.revalidate();
         button.repaint();
 	}
+	
+    public void updateMenu() {
+
+        for (Component component : this.getComponents()) {
+            //System.out.println(component.getName());
+            if (component instanceof JMenu) {
+                JMenu menu = (JMenu) component;
+                //System.out.println(menu.getName());
+                menu.setText(messages.getString("menu" + menu.getName()));
+                for (Component menuItemComponent : menu.getMenuComponents()) {
+                    if (menuItemComponent instanceof JMenuItem) {
+                        JMenuItem menuItem = (JMenuItem) menuItemComponent;
+                        menuItem.setText(messages.getString("menu" + menuItem.getName()));
+                    }
+                }
+            }
+        }
+
+        SwingUtilities.updateComponentTreeUI(this);
+    }
 
 }

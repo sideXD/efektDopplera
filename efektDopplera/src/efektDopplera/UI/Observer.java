@@ -27,7 +27,7 @@ public class Observer {
 		freq = 0;
 		
 		try {
-			img = ImageIO.read(new File("img/mic.png"));
+			img = ImageIO.read(new File("img/microphone_icon.png"));
 		} catch (IOException e) {
 			String errorMess = "Problem z wczytanie grafiki obserwatora";
 			JOptionPane.showMessageDialog(null, errorMess, "Error",JOptionPane.ERROR_MESSAGE);

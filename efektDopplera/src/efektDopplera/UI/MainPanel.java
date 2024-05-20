@@ -19,11 +19,11 @@ public class MainPanel extends JPanel implements Runnable {
 
 	int width, height;
 	
-	final public String sourcePath = "img/source.png";
+	final public String sourcePath = "img/speaker_icon.png";
 	final ImageIcon sourceIcon = new ImageIcon(sourcePath);
 	final public Image source = sourceIcon.getImage();
 	
-	final public String observerPath = "img/mic.png";
+	final public String observerPath = "img/microphone_icon.png";
 	final ImageIcon observerIcon = new ImageIcon(observerPath);
 	//final public Image observer = observerIcon.getImage();
 	
@@ -53,7 +53,8 @@ public class MainPanel extends JPanel implements Runnable {
 		
 		
 		this.waveSource = waveSource;
-		this.observer = new Observer((this.width - this.imgWidth)/2, this.height - 160, this.imgWidth , this.imgHeight - 10);
+		//this.observer = new Observer((this.width - this.imgWidth)/2, this.height - 160, this.imgWidth , this.imgHeight - 10);
+		this.observer = new Observer((this.width - this.imgWidth)/2, this.height - 160, 80, 130);
 		
 		this.setPreferredSize(new Dimension(this.width, this.height)); 
 		
