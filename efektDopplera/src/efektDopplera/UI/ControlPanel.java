@@ -34,8 +34,8 @@ import java.awt.Component;
 import java.awt.Container;
 
 public class ControlPanel extends JPanel implements ActionListener, ChangeListener, Runnable{
-	static final int VMINOR_SPACING = 0;
-	static final int VMAJOR_SPACING = 20;
+	static final int VMINOR_SPACING = 5;
+	static final int VMAJOR_SPACING = 10;
 	static final int FMINOR_SPACING = 50;
 	static final int FMAJOR_SPACING = 100;
 	static final int INIT_Val = 0;
@@ -87,8 +87,8 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		vSourceLabel.setFont(sourceFont);
 		vSourceLabel.setName("controlSourcevelocity");
 		
-		vSource = new JSlider(-100, 100, INIT_Val); //predkosc w m/s
-		
+		vSource = new JSlider(-50, 50, INIT_Val); //predkosc w m/s
+		 
 		vSource.addChangeListener(this);
 		
 		vSource.setMinorTickSpacing(VMINOR_SPACING);

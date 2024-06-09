@@ -11,10 +11,10 @@ import javax.swing.JOptionPane;
 
 public class WaveSource {
 
-	private int posX;
+	private float posX;
 	private int posY;
 	
-	public int vx;
+	public float vx;
 
 	private int freq;
 	private BufferedImage img;
@@ -51,7 +51,7 @@ public class WaveSource {
 	public void draw(Graphics g) {
 		
 		g = (Graphics2D) g;
-		g.drawImage(this.img, this.posX,this.posY, this.imgWidth,this.imgHeight, null);
+		g.drawImage(this.img, (int)this.posX,this.posY, this.imgWidth,this.imgHeight, null);
 	}
 	
 	public void updatePosition() {
@@ -68,11 +68,11 @@ public class WaveSource {
 		this.vx = vx;
 	}
 	
-	public int getVelocity() {
+	public float getVelocity() {
 		return this.vx;
 	}
 	
-	public int getX() {
+	public float getX() {
 		return this.posX;
 	}
 	public int getY() {

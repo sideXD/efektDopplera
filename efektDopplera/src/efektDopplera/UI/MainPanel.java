@@ -62,13 +62,14 @@ public class MainPanel extends JPanel implements Runnable {
 	
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		synchronized(waves) {
 		this.waveSource.draw(g);
 		this.observer.draw(g);
 		this.drawWaves(g);
 		//g.drawImage(source, 10, this.height - 160, this.imgWidth, this.imgHeight, this);
 		//g.drawImage(observer, (this.width - this.imgWidth)/2, this.height - 160, this.imgWidth , this.imgHeight - 10, this);
 		this.drawArrow(g);
-		
+		}
 	}
 	
 	void drawArrow(Graphics g) {
@@ -108,15 +109,18 @@ public class MainPanel extends JPanel implements Runnable {
 	private void drawWaves(Graphics g) {
 		Wave wave;
 		Color tmp = g.getColor();
+		
 		for (int i = 0; i < waves.size(); i++) {
 			//System.out.println(waves.get(i));
-			if (i%2 == 0) {
-				g.setColor(this.getBackground());
-			}
-			else {
-				g.setColor(Color.RED);
-			}
+			
+//			if (i%2 == 0) {
+//				g.setColor(this.getBackground());
+//			}
+//			else {
+//				g.setColor(Color.RED);
+//			}
 			wave = (Wave) waves.get(i);
+			g.setColor(wave.getColor());
 			wave.draw(g);
 		}
 		g.setColor(tmp);
@@ -125,29 +129,44 @@ public class MainPanel extends JPanel implements Runnable {
 	public void run() {
 		System.out.println("rozpoczecie watku");
 		while(f.getControlPanel().isItRunning()) { 
-			waveSource.updatePosition();
-			for(Wave w: this.waves) {
-				w.updateWavePosition(f.getTimeDelaySecs());
+			synchronized(waves) {
+				waveSource.updatePosition();
+				for(Wave w: this.waves) {
+					w.updateWavePosition(f.getTimeDelaySecs());
+				}
+				//TODOWrzucic w inny watek lub jakos w ten sposob
+				if(waves.size() > 0) {
+					if((int)waves.get(0).getWidth() >= 2 *this.getWidth()) {
+						waves.remove(0);
+					}
+				}
+				
+				//Stworzenie nowej fali rozchodzacej sie 
+				//TODO przemyslec ideę tworzenia fali w danej chwili czasu
+				if (this.waveSource.getFreq() != 0 ) {
+					Wave circle = new Wave();
+					if(circle.getIndex()%2 == 0) {
+						//circle.setColor(this.getBackground());
+						circle.setColor(Color.BLUE);
+					}
+					else {
+						circle.setColor(Color.RED);
+					}
+					circle.setX((int)this.waveSource.getX());
+					circle.setY(this.waveSource.getY());
+					circle.setSourceFreq(this.waveSource.getFreq());
+					waves.add(circle);
+					
+				}
 			}
-			
-			//Stworzenie nowej fali rozchodzacej sie 
-			//TODO przemyslec ideę tworzenia fali w danej chwili czasu
-			if (this.waveSource.getFreq() != 0 ) {
-				Wave circle = new Wave();
-				circle.setX(this.waveSource.getX());
-				circle.setY(this.waveSource.getY());
-				circle.setSourceFreq(this.waveSource.getFreq());
-				waves.add(circle);
-			}
-			
-			
 			try {
 				Thread.sleep(f.getTimeDelayMilis());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			
-			f.getControlPanel().xCords.setText(String.valueOf(this.waveSource.getX()));
+			
+			f.getControlPanel().xCords.setText(String.valueOf((int)this.waveSource.getX()));
 			//f.getControlPanel().yCords.setText(String.valueOf(this.waveSource.getY()));
 			//yCords.setText(String.valueOf(this.waveSource.getY()));
 			this.repaint();
@@ -168,7 +187,45 @@ public class MainPanel extends JPanel implements Runnable {
 	public void clearWaveArray() {
 		this.waves.clear();
 	}
-	
-	
+
+	public void createWaves(double n) {
+		ArrayList<Wave> tmpList = new ArrayList<Wave>();
+		//System.out.println(n);
+		//System.out.println(Math.ceil(n));
+		
+//		int nInv2 = (int)(1/(n+1));
+
+		if(n%2!=0) {
+			n++;
+		}
+		int nInv = (int)(1/n);
+		for(int i =1; i < Math.ceil(n+1) ; i++) {
+			Wave circle = new Wave();
+			if(circle.getIndex()%2 == 0) {
+				//circle.setColor(this.getBackground());
+				circle.setColor(Color.BLUE);
+			}
+			else {
+				circle.setColor(Color.RED);
+			}
+			circle.setX((int)this.waveSource.getX());
+			circle.setY(this.waveSource.getY());
+			circle.setSourceFreq(this.waveSource.getFreq());
+			
+			try {
+				Thread.sleep(f.getTimeDelayMilis()*nInv);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			tmpList.add(circle);
+			
+			waves.add(circle);
+
+			for(Wave wave: tmpList) {
+				wave.updateWavePosition(f.getTimeDelaySecs()*nInv);
+			}
+			
+		}
+	}
 
 }
