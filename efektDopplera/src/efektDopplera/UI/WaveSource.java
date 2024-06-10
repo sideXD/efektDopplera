@@ -23,6 +23,7 @@ public class WaveSource {
 	
 	private MainWindow f;
 	
+	
 	public WaveSource() {
 		this.posX = 0;
 		this.posY = 0;

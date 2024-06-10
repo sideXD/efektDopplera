@@ -38,6 +38,14 @@ public class MainPanel extends JPanel implements Runnable {
 
 	ArrayList<Wave> waves = new ArrayList<Wave>();
 	
+	ArrayList<Float> freqSrcList = new ArrayList<Float>();
+	ArrayList<Float> freqRecList = new ArrayList<Float>();
+	ArrayList<Float> xPosList = new ArrayList<Float>();
+	int yPosToFile = -1;
+	ArrayList<Float> velList = new ArrayList<Float>();
+	
+	
+	
 	
 	MainWindow f; //Przyjmuje ten parametr, zeby watek sie mial kiedy skonczyc i do odmierzania czasu dla fali 
 	
@@ -128,11 +136,23 @@ public class MainPanel extends JPanel implements Runnable {
 	
 	public void run() {
 		System.out.println("rozpoczecie watku");
+		
+		//czyszczenie dotychczasowego zapisu list
+		clearLists();
+		this.yPosToFile = waveSource.getY();
+		
 		while(f.getControlPanel().isItRunning()) { 
 			synchronized(waves) {
+				
+				//dodawanie w kazdej iteracji danych do list do zapisu
+				freqSrcList.add((float) this.waveSource.getFreq());
+				velList.add(this.waveSource.getVelocity());
+				xPosList.add(this.waveSource.getX());
+				freqRecList.add(this.observer.getFreq());
+
 				waveSource.updatePosition();
 				for(Wave w: this.waves) {
-					w.updateWavePosition(f.getTimeDelaySecs());
+					w.updateWavePosition(f.getTimeDelayMilis());
 				}
 				//TODOWrzucic w inny watek lub jakos w ten sposob
 				if(waves.size() > 0) {
@@ -159,6 +179,7 @@ public class MainPanel extends JPanel implements Runnable {
 					
 				}
 			}
+			
 			try {
 				Thread.sleep(f.getTimeDelayMilis());
 			} catch (InterruptedException e) {
@@ -227,5 +248,40 @@ public class MainPanel extends JPanel implements Runnable {
 			
 		}
 	}
+	
+	public void clearLists() {
+		freqSrcList.removeAll(freqSrcList);
+		freqRecList.removeAll(freqRecList);
+		velList.removeAll(velList);
+		xPosList.removeAll(xPosList);
+	}
+	
+	public float getList(int list, int index) {
+		switch(list) 
+		{
+			case -1:
+			{
+				return freqSrcList.size();
+			}
+			case 0:
+			{
+				return freqSrcList.get(index);
+			}
+			case 1:
+			{
+				return freqRecList.get(index);
+			}
+			case 2:
+			{
+				return xPosList.get(index);
+			}
+			case 3:
+			{
+				return velList.get(index);
+			}
+		}
+		return (Float) null;
 
+		
+	}
 }

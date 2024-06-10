@@ -3,9 +3,17 @@ package efektDopplera.UI;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -17,6 +25,7 @@ import java.awt.Container;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class MainMenu extends JMenuBar {
     private static final long serialVersionUID = 1L;
@@ -24,6 +33,8 @@ public class MainMenu extends JMenuBar {
     JMenu file, chart, language, help;
     JMenuItem plItem, enItem, description, authors, save, close, drawChart;
 	
+    MainWindow f;
+    
 	public MainMenu(Locale locale) {
 		messages = ResourceBundle.getBundle("messages_pl", locale);
 		
@@ -110,7 +121,59 @@ public class MainMenu extends JMenuBar {
         	}
         		
         	});
-    
+        
+        save.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				MainPanel mainPanel = f.getMainPanel();
+				int size = (int)mainPanel.getList(-1, -1); //dlugosc listy
+				JFileChooser output = new JFileChooser();
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("pliki", "txt");
+				
+				int returnVal = output.showSaveDialog(getParent());
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = output.getSelectedFile();
+					OutputStreamWriter osw;
+					
+					String tmp = "Dane uzyskane podczas symulacji dla wartości Y = " + mainPanel.getYToSave() + " : ";
+					tmp += "\nCzęstotliwość źródła[Hz]: Częstotliwość obserwowana[Hz]: Prędkość źródła: Pozycja X-owa źródła: ";
+					for(int i = 0; i < size; i++) {
+						float fSrc = mainPanel.getList(0, i);
+						float fObs = mainPanel.getList(1, i);
+						float v = mainPanel.getList(3, i);
+						float x = mainPanel.getList(2, i);
+						String format = String.format("\n%8.4f %25.4f %30.4f %16.4f",fSrc, fObs, v, x);
+						tmp+=format;
+					}
+					try {
+						osw = new OutputStreamWriter(
+						        new FileOutputStream(file),
+						        Charset.forName("UTF-8").newEncoder() 
+						    );
+							try {
+								
+								BufferedWriter writer = new BufferedWriter(osw);
+								writer.write(tmp);
+								writer.close();
+								
+								
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					
+				}
+				
+				
+			}
+		});
         
 	}
 	
@@ -140,6 +203,10 @@ public class MainMenu extends JMenuBar {
         }
 
         SwingUtilities.updateComponentTreeUI(this);
+    }
+    
+    public void setFrame(MainWindow f) {
+    	this.f = f;
     }
 
 }

@@ -48,6 +48,7 @@ public class MainWindow extends JFrame implements ComponentListener{
 		this.add(mainPanel, BorderLayout.LINE_START);
 		
 		mainMenu = new MainMenu(Locale.getDefault());
+		mainMenu.setFrame(this);
 		this.add(mainMenu, BorderLayout.PAGE_START);
 		
 		controlPanel = new ControlPanel(Locale.getDefault(), waveSource, mainPanel, mainMenu);
