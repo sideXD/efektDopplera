@@ -25,7 +25,7 @@ public class Wave {
 		
 	}
 	
-	public void setX(int x) {
+	public void setX(float x) {
 		this.posX = x;
 	}
 	public void setY(int y) {
@@ -48,8 +48,7 @@ public class Wave {
 	
 	public void setSourceFreq(double freq) {
 		this.freq = freq;
-		this.posX += this.posX;
-		this.posY += this.posY;
+
 	}
 	
 	public void updateWavePosition(double timeDelay) { //czas podany w sekundach
