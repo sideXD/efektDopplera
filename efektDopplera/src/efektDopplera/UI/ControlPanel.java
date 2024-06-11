@@ -300,6 +300,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 				sourceXpos = Integer.valueOf(this.xCords.getText());
 				sourceYpos = Integer.valueOf(this.yCords.getText());
 				waveSource.setPosition(sourceXpos, sourceYpos);
+				mainPanel.moveWaves();
 				this.mainPanel.repaint();
 			}
 			catch(NumberFormatException ex) {

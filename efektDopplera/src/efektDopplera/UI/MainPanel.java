@@ -300,4 +300,10 @@ public class MainPanel extends JPanel implements Runnable {
 	public int getYToSave() {
 		return this.yPosToFile;
 	}
+	public void moveWaves() {
+		for(Wave w: waves) {
+			w.setX((float) ((int)this.waveSource.getX() + 0.5*waveSource.getImgWidth()-0.5*w.getWidth()));
+			w.setY((int) ((int)this.waveSource.getY() + 0.5*waveSource.getImgHeight()-0.5*w.getWidth()));
+		}
+	}
 }

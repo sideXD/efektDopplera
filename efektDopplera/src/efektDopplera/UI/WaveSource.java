@@ -88,5 +88,11 @@ public class WaveSource {
 	public void setFrame(MainWindow f) {
 		this.f =f;
 	}
+	public int getImgWidth() {
+		return this.imgWidth;
+	}
+	public int getImgHeight() {
+		return this.imgHeight;
+	}
 	
 }
