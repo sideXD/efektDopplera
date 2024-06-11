@@ -15,6 +15,7 @@ public class Wave {
 	
 	static int wavesNum = 0; //zlicznik indexow fal
 	int index;
+	static int colorIndex;
 	Color color;
 	
 	public Wave() {
@@ -78,5 +79,10 @@ public class Wave {
 	public Color getColor() {
 		return this.color;
 	}
-
+	static public void updateColorIndex() {
+		Wave.colorIndex+=1;
+	}
+	static public int getColorIndex() {
+		return Wave.colorIndex;
+	}
 }

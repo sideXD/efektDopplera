@@ -71,9 +71,10 @@ public class MainPanel extends JPanel implements Runnable {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		synchronized(waves) {
+		this.drawWaves(g);
 		this.waveSource.draw(g);
 		this.observer.draw(g);
-		this.drawWaves(g);
+		
 		//g.drawImage(source, 10, this.height - 160, this.imgWidth, this.imgHeight, this);
 		//g.drawImage(observer, (this.width - this.imgWidth)/2, this.height - 160, this.imgWidth , this.imgHeight - 10, this);
 		this.drawArrow(g);
@@ -152,7 +153,7 @@ public class MainPanel extends JPanel implements Runnable {
 
 				waveSource.updatePosition();
 				for(Wave w: this.waves) {
-					w.updateWavePosition(f.getTimeDelayMilis());
+					w.updateWavePosition(f.getTimeDelaySecs());
 				}
 				//TODOWrzucic w inny watek lub jakos w ten sposob
 				if(waves.size() > 0) {
@@ -165,13 +166,26 @@ public class MainPanel extends JPanel implements Runnable {
 				//TODO przemyslec ideę tworzenia fali w danej chwili czasu
 				if (this.waveSource.getFreq() != 0 ) {
 					Wave circle = new Wave();
-					if(circle.getIndex()%2 == 0) {
-						//circle.setColor(this.getBackground());
-						circle.setColor(Color.BLUE);
+					int waveCooficient = (int)(950/waveSource.getFreq()) ;
+					
+					if(circle.getIndex()%waveCooficient != 0 ) {
+						circle.setColor(this.getBackground());
 					}
 					else {
-						circle.setColor(Color.RED);
+						Wave.updateColorIndex();
+						if(Wave.getColorIndex() %2 ==1 ) {
+							circle.setColor(Color.BLUE);
+						}
+						else {
+							circle.setColor(Color.RED);
+						}
 					}
+//					else if(circle.getIndex()%2 == 0) {
+//						//circle.setColor(this.getBackground());
+//						circle.setColor(Color.BLUE);
+//					}
+					
+						
 					circle.setX((int)this.waveSource.getX());
 					circle.setY(this.waveSource.getY());
 					circle.setSourceFreq(this.waveSource.getFreq());
@@ -282,6 +296,8 @@ public class MainPanel extends JPanel implements Runnable {
 		}
 		return (Float) null;
 
-		
+	}
+	public int getYToSave() {
+		return this.yPosToFile;
 	}
 }
