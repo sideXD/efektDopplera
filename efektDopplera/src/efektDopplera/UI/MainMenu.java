@@ -30,21 +30,39 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class MainMenu extends JMenuBar {
     private static final long serialVersionUID = 1L;
     ResourceBundle messages;
-    JMenu file, chart, language, help;
-    JMenuItem plItem, enItem, description, authors, save, close, drawChart;
+    JMenu file, chart, changeIcon, language, help;
+    JMenuItem plItem, enItem, description, authors, save, close, drawChart, speakerItem, dinoItem, ambulanceItem;
 	
     MainWindow f;
+    
+    //ChartToPDF chartToPDF;
     
 	public MainMenu(Locale locale) {
 		messages = ResourceBundle.getBundle("messages_pl", locale);
 		
 		file = new JMenu(messages.getString("menuFile"));
 		chart = new JMenu(messages.getString("menuChart"));
+		changeIcon = new JMenu(messages.getString("menuIcon"));
 		language = new JMenu(messages.getString("menuLanguage"));
         file.setName("File");
         chart.setName("Chart");
         language.setName("Language");
+        changeIcon.setName("Icon");
+        
+        speakerItem = new JMenuItem(messages.getString("menuIconItemSpeaker"));
+        dinoItem = new JMenuItem(messages.getString("menuIconItemDino"));
+        ambulanceItem = new JMenuItem(messages.getString("menuIconItemAmbulance"));
+        changeIcon.add(speakerItem);
+        changeIcon.add(dinoItem);
+        changeIcon.add(ambulanceItem);
+        speakerItem.setName("IconItemSpeaker");
+		dinoItem.setName("IconItemDino");
+		ambulanceItem.setName("IconItemAmbulance");
 		
+		ChangeIcon("img/speaker_icon.png", speakerItem);
+		ChangeIcon("img/dino_icon.png", dinoItem);
+		ChangeIcon("img/ambulance_icon.png", ambulanceItem);
+        
 		plItem = new JMenuItem(messages.getString("menuLanguagePolish"));
 		enItem = new JMenuItem(messages.getString("menuLanguageEnglish"));
 		language.add(plItem);
@@ -101,9 +119,19 @@ public class MainMenu extends JMenuBar {
 		drawChart = new JMenuItem(messages.getString("menuChartDraw"));
 		chart.add(drawChart);
         drawChart.setName("ChartDraw");
+        
+        /*
+        drawChart.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		    	chartToPDF = new ChartToPDF();
+		    }
+		});
+		*/
 		
 		this.add(file);
 		this.add(chart);
+		this.add(changeIcon);
 		this.add(language);
 		this.add(help);
 		
@@ -136,8 +164,9 @@ public class MainMenu extends JMenuBar {
 					File file = output.getSelectedFile();
 					OutputStreamWriter osw;
 					
-					String tmp = "Dane uzyskane podczas symulacji dla wartości Y = " + mainPanel.getYToSave() + " : ";
-					tmp += "\nCzęstotliwość źródła[Hz]: Częstotliwość obserwowana[Hz]: Prędkość źródła: Pozycja X-owa źródła: ";
+					
+					String tmp = messages.getString("fileHeading") + mainPanel.getYToSave() + " : ";
+					tmp += messages.getString("fileMainText");
 					for(int i = 0; i < size; i++) {
 						float fSrc = mainPanel.getList(0, i);
 						float fObs = mainPanel.getList(1, i);
@@ -162,6 +191,8 @@ public class MainMenu extends JMenuBar {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
+							
+							JOptionPane.showMessageDialog(null, messages.getString("fileSaveNotification"));
 							
 					} catch (FileNotFoundException e1) {
 						// TODO Auto-generated catch block

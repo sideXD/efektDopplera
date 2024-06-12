@@ -23,6 +23,8 @@ public class WaveSource {
 	
 	private MainWindow f;
 	
+	public String sourcePath = "img/speaker_icon.png"; //nowa
+	
 	public WaveSource() {
 		this.posX = 0;
 		this.posY = 0;
@@ -31,7 +33,7 @@ public class WaveSource {
 		this.imgWidth = 100;
 		this.imgHeight = 100;
 		//Wczytanie defaultowej ikony zrodla
-		readImage("img/speaker_icon.png");
+		readImage(sourcePath);
 		
 	}
 	public void readImage(String filePath) {
@@ -44,8 +46,9 @@ public class WaveSource {
 		}
 	}
 	
-	public void setImage() {
-		//TODO gdy beda gotowe dodatkowe zrdola dziwieku
+	public void setImage(String newSourcePath) {
+	    this.sourcePath = newSourcePath;
+	    readImage(this.sourcePath);
 	}
 	
 	public void draw(Graphics g) {

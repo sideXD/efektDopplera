@@ -99,6 +99,14 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		sourcePanel.add(vSourceLabel, BorderLayout.NORTH);
 		sourcePanel.add(vSource, BorderLayout.CENTER);
 		
+		vSource.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                // Update the label when the slider value changes
+                fSource.getValue();
+            }
+        });
+		
 		
 //predkosc obserwatora
 		
@@ -207,6 +215,14 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 		
 		freqPanel.add(fLabel, BorderLayout.PAGE_START);
 		freqPanel.add(fSource, BorderLayout.CENTER);
+		
+		fSource.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                // Update the label when the slider value changes
+                fSource.getValue();
+            }
+        });
 		
 //dane wyjsciowe
 		JPanel textPanel = new JPanel();

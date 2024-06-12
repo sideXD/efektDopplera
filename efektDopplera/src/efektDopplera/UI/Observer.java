@@ -19,6 +19,8 @@ public class Observer {
 	private int imgWidth = 0;
 	private int imgHeight = 0;
 	
+	public String observerPath = "img/microphone_icon.png"; //nowa
+	
 	public Observer(int posX, int posY, int imgWidth, int imgHeight) {
 		this.posX = posX;
 		this.posY = posY;
@@ -27,7 +29,8 @@ public class Observer {
 		freq = 0;
 		
 		try {
-			img = ImageIO.read(new File("img/microphone_icon.png"));
+			//img = ImageIO.read(new File("img/microphone_icon.png")); zmiana
+			img = ImageIO.read(new File(observerPath));
 		} catch (IOException e) {
 			String errorMess = "Problem z wczytanie grafiki obserwatora";
 			JOptionPane.showMessageDialog(null, errorMess, "Error",JOptionPane.ERROR_MESSAGE);

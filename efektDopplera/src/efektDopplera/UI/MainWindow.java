@@ -27,6 +27,7 @@ public class MainWindow extends JFrame implements ComponentListener{
 	MainMenu mainMenu;
 	MainPanel mainPanel;
 	WaveSource waveSource;
+	ChartToPDF chartToPDF;
 	
 	final private int timeDelay = 50; //w milisekundach !!!
 	
@@ -78,6 +79,39 @@ public class MainWindow extends JFrame implements ComponentListener{
 		    	rename();
 		    	controlPanel.updateControlPanel(mainMenu);
 		    	mainMenu.updateMenu();
+		    }
+		});
+		
+		
+		mainMenu.speakerItem.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		    	mainPanel.sourcePath="img/speaker_icon.png";
+		    	waveSource.setImage("img/speaker_icon.png");
+		    }
+		});
+		
+		mainMenu.dinoItem.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		    	mainPanel.sourcePath="img/dino_icon.png";
+		    	waveSource.setImage("img/dino_icon.png");
+		    }
+		});
+		
+		mainMenu.ambulanceItem.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		    	mainPanel.sourcePath="img/ambulance_icon.png";
+		    	waveSource.setImage("img/ambulance_icon.png");
+		    }
+		});
+		
+		
+		mainMenu.drawChart.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		    	chartToPDF = new ChartToPDF(controlPanel, mainMenu, mainPanel);
 		    }
 		});
 		

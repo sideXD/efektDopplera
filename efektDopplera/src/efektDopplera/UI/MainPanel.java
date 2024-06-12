@@ -19,12 +19,12 @@ public class MainPanel extends JPanel implements Runnable {
 
 	int width, height;
 	
-	final public String sourcePath = "img/speaker_icon.png";
-	final ImageIcon sourceIcon = new ImageIcon(sourcePath);
-	final public Image source = sourceIcon.getImage();
+	public String sourcePath = "img/speaker_icon.png";
+	ImageIcon sourceIcon = new ImageIcon(sourcePath);
+	public Image source = sourceIcon.getImage();
 	
-	final public String observerPath = "img/microphone_icon.png";
-	final ImageIcon observerIcon = new ImageIcon(observerPath);
+	public String observerPath = "img/microphone_icon.png";
+	ImageIcon observerIcon = new ImageIcon(observerPath);
 	//final public Image observer = observerIcon.getImage();
 	
 	int imgWidth, imgHeight;
